@@ -4,7 +4,7 @@
   "description": "CLI tool to remove beta tags",
   "main": "index.js",
   "scripts": {
-    "version": "genversion -e -s version.js",
+    "version": "genversion -e -s ./src/version.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
