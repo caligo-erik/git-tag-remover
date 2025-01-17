@@ -1,6 +1,6 @@
 {
   "name": "git-tag-remover",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "CLI tool to remove git tags",
   "bin": {
     "git-tag-remover": "./src/index.js"
