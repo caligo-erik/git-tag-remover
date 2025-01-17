@@ -3,13 +3,15 @@
 const { program } = require('commander');
 const { execSync } = require('child_process');
 const inquirer = require('inquirer');
-const { version } = require('./version'); // Ensure this file exists or update the script to avoid dependency
+const version = require('./version'); // Ensure this file exists or define a fallback version
+
+// Initialize `createPromptModule`
+const prompt = inquirer.createPromptModule();
 
 // Fetch all tags matching a filter
 function getTags(filter) {
   try {
     const tags = execSync('git tag -l', { encoding: 'utf-8' }).split('\n').filter(Boolean);
-
     return filter ? tags.filter((tag) => tag.includes(filter)) : tags;
   } catch (error) {
     console.error('❌ Error fetching tags:', error.message);
@@ -78,7 +80,7 @@ async function handleBetaOption(autoConfirm) {
       { name: 'Exit', value: 'exit' },
     ];
 
-    const { selectedGroup } = await inquirer.prompt([
+    const { selectedGroup } = await prompt([
       {
         type: 'list',
         name: 'selectedGroup',
@@ -99,17 +101,18 @@ async function handleBetaOption(autoConfirm) {
       selectedTags = groups[selectedGroup];
     }
 
-    if (autoConfirm || selectedGroup === 'all') {
+    if (autoConfirm) {
       console.log('\nDeleting selected tags...');
       deleteTags(selectedTags);
       return;
     }
 
+    // Confirmation prompt for deletion
     while (true) {
       console.log('\nThe following tags will be deleted:');
       console.log(selectedTags.join('\n'));
 
-      const { confirm } = await inquirer.prompt([
+      const { confirm } = await prompt([
         {
           type: 'list',
           name: 'confirm',

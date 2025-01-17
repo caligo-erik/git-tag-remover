@@ -4,6 +4,9 @@ const { execSync } = require('child_process');
 const { uniqueNamesGenerator, adjectives, colors, animals } = require('unique-names-generator');
 const inquirer = require('inquirer');
 
+// Initialize `createPromptModule`
+const prompt = inquirer.createPromptModule();
+
 // Generate a unique branch name
 function generateBranchName() {
   return uniqueNamesGenerator({
@@ -11,6 +14,14 @@ function generateBranchName() {
     separator: '-',
     style: 'lowercase',
   });
+}
+
+// Generate random version numbers for major.minor.patch
+function generateRandomVersion() {
+  const major = Math.floor(Math.random() * 10) + 1; // Random between 1 and 10
+  const minor = Math.floor(Math.random() * 10) + 1;
+  const patch = Math.floor(Math.random() * 10) + 1;
+  return `${major}.${minor}.${patch}`;
 }
 
 // Function to create tags
@@ -23,20 +34,24 @@ async function createTags(branchCount, maxBetaVersions) {
     // Generate branch names and beta tags
     for (let i = 0; i < branchCount; i++) {
       const branchName = generateBranchName();
-      branches.push(branchName);
+      const version = generateRandomVersion(); // Unique version for each branch
+      branches.push({ branchName, version });
 
       // Determine the number of beta versions for this branch
       const betaCount = Math.max(2, Math.floor(Math.random() * (maxBetaVersions - 1)) + 2);
 
-      for (let version = 0; version < betaCount; version++) {
-        const tag = `21.4.3-beta-${branchName}.${version}`;
+      for (let betaVersion = 0; betaVersion < betaCount; betaVersion++) {
+        const tag = `${version}-beta-${branchName}.${betaVersion}`;
         execSync(`git tag ${tag}`);
         console.log(`✅ Created tag: ${tag}`);
       }
     }
 
     console.log('\n🏁 All test tags created successfully.');
-    console.log('\nGenerated branches:', branches.join(', '));
+    console.log('\nGenerated branches and versions:');
+    branches.forEach(({ branchName, version }) => {
+      console.log(`- ${branchName}: ${version}`);
+    });
   } catch (error) {
     console.error('❌ Error creating tags:', error.message);
     process.exit(1);
@@ -52,7 +67,7 @@ async function main() {
     execSync('git rev-parse --is-inside-work-tree', { stdio: 'ignore' });
 
     // Prompt user for configuration
-    const answers = await inquirer.prompt([
+    const answers = await prompt([
       {
         type: 'number',
         name: 'branchCount',
