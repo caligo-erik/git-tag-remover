@@ -1,13 +1,15 @@
 {
   "name": "git-tag-remover",
   "version": "0.0.1",
-  "description": "CLI tool to remove beta tags",
-  "main": "index.js",
+  "description": "CLI tool to remove git tags",
+  "bin": {
+    "git-tag-remover": "./src/index.js"
+  },
+  "main": "./src/index.js",
   "scripts": {
     "version": "genversion -s ./src/version.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
   "author": "Erik Norman",
   "license": "MIT",
   "dependencies": {
@@ -18,5 +20,13 @@
     "chai": "^5.1.2",
     "genversion": "^3.2.0",
     "unique-names-generator": "^4.7.1"
-  }
+  },
+  "keywords": [
+    "git",
+    "tags",
+    "removal",
+    "cli",
+    "beta",
+    "utility"
+  ]
 }
