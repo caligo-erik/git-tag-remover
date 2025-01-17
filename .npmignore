@@ -1,0 +1,8 @@
+# Ignore everything except the src folder
+*
+
+# Whitelist the files and folders we want to include
+!src/
+!package.json
+!README.md
+!LICENSE

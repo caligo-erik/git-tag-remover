@@ -3,16 +3,18 @@
 const { program } = require('commander');
 const { execSync } = require('child_process');
 const inquirer = require('inquirer');
-const { version } = require('./version');
+const version = require('./version'); // Ensure this file exists or define a fallback version
+
+// Initialize `createPromptModule`
+const prompt = inquirer.createPromptModule();
 
 // Fetch all tags matching a filter
 function getTags(filter) {
   try {
     const tags = execSync('git tag -l', { encoding: 'utf-8' }).split('\n').filter(Boolean);
-
     return filter ? tags.filter((tag) => tag.includes(filter)) : tags;
   } catch (error) {
-    console.error('Error fetching tags:', error.message);
+    console.error('❌ Error fetching tags:', error.message);
     process.exit(1);
   }
 }
@@ -46,15 +48,15 @@ function groupBetaTags(tags) {
 
 // Delete selected tags
 function deleteTags(tags) {
-  try {
-    tags.forEach((tag) => {
+  tags.forEach((tag) => {
+    try {
       execSync(`git tag -d ${tag}`);
       execSync(`git push origin :refs/tags/${tag}`);
-    });
-    console.log('\n✅ Tags deleted successfully.');
-  } catch (error) {
-    console.error('Error deleting tags:', error.message);
-  }
+      console.log(`✅ Deleted tag: ${tag}`);
+    } catch (error) {
+      console.error(`❌ Failed to delete tag: ${tag} - ${error.message}`);
+    }
+  });
 }
 
 // Handle the --beta option
@@ -78,7 +80,7 @@ async function handleBetaOption(autoConfirm) {
       { name: 'Exit', value: 'exit' },
     ];
 
-    const { selectedGroup } = await inquirer.prompt([
+    const { selectedGroup } = await prompt([
       {
         type: 'list',
         name: 'selectedGroup',
@@ -99,11 +101,18 @@ async function handleBetaOption(autoConfirm) {
       selectedTags = groups[selectedGroup];
     }
 
+    if (autoConfirm) {
+      console.log('\nDeleting selected tags...');
+      deleteTags(selectedTags);
+      return;
+    }
+
+    // Confirmation prompt for deletion
     while (true) {
       console.log('\nThe following tags will be deleted:');
       console.log(selectedTags.join('\n'));
 
-      const { confirm } = await inquirer.prompt([
+      const { confirm } = await prompt([
         {
           type: 'list',
           name: 'confirm',
@@ -116,9 +125,7 @@ async function handleBetaOption(autoConfirm) {
       ]);
 
       if (confirm === 'yes') {
-        if (autoConfirm || selectedGroup === 'all') {
-          console.log('\nDeleting selected tags...');
-        }
+        console.log('\nDeleting selected tags...');
         deleteTags(selectedTags);
         return;
       } else if (confirm === 'back') {
@@ -140,7 +147,7 @@ program
     if (options.beta) {
       await handleBetaOption(options.yes);
     } else {
-      console.error('Error: You must specify an option, e.g., --beta.');
+      console.error('❌ Error: You must specify an option, e.g., --beta.');
       program.help();
     }
   });
