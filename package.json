@@ -25,7 +25,8 @@
   "license": "MIT",
   "dependencies": {
     "commander": "^13.0.0",
-    "inquirer": "^12.3.2"
+    "inquirer": "^12.3.2",
+    "semver": "^7.6.3"
   },
   "devDependencies": {
     "chai": "^5.1.2",
