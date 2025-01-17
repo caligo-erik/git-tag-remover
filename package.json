@@ -7,7 +7,18 @@
   },
   "main": "./src/index.js",
   "scripts": {
+    "beta": "BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD) && npm --no-git-tag-version --preid=beta-$(echo $BRANCH_NAME | sed 's/[^a-zA-Z0-9]/-/g') version prerelease && npm run tag && npm publish . --tag beta",
+    "branchCheck": "branch=$(git rev-parse --abbrev-ref HEAD); if [ \"$branch\" != \"main\" ]; then echo 'You must be on main to run this script!'; exit 1; fi && git pull",
+    "prepatch": "npm run branchCheck",
+    "patch": "npm --no-git-tag-version version patch && npm run tag && npm run clean:beta",
+    "preminor": "npm run branchCheck",
+    "minor": "npm --no-git-tag-version version minor && npm run tag && npm run clean:beta",
+    "premajor": "npm run branchCheck",
+    "major": "npm --no-git-tag-version version major && npm run tag && npm run clean:beta",
+    "tag": "npm run version && git commit -a -m $npm_package_version && git tag -a $npm_package_version -m $npm_package_version",
+    "posttag": "git push --follow-tags",
     "version": "genversion -s ./src/version.js",
+    "check": "genversion -c -s -v ./src/version.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Erik Norman",
